@@ -49,16 +49,16 @@ app.use((err, req, res, next) => {
   next();
 });
 
-process.on('uncaughtException', (error, origin) => {
-  console.error(`capture error: ${error.message}, error origin: ${origin}`);
+app.use('/users', userRouter);
+
+app.use('/boards', boardRouter);
+
+process.on('uncaughtException', error => {
+  console.error(`capture error: ${error.message}`);
 });
 
 process.on('unhandledRejection', reason => {
   console.error(`Unhandled rejection detected: ${reason.message}`);
 });
-
-app.use('/users', userRouter);
-
-app.use('/boards', boardRouter);
 
 module.exports = app;
