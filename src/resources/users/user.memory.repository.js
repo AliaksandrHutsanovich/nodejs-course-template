@@ -1,28 +1,33 @@
-const uuid = require('uuid');
 const User = require('./user.model');
-const { users } = require('../../hardcodedData');
 
 const getAll = async () => {
   // TODO: mock implementation. should be replaced during task development
-  return Object.keys(users).map(key => users[key]);
+  const users = await User.find({});
+  return users;
 };
 
 const getById = async id => {
-  return users[id];
+  const user = await User.findOne({ _id: id });
+  return user;
 };
 
-const create = async ({ id = uuid(), name, login, password }) => {
-  users[id] = new User({ id, name, login, password });
-  return users[id];
+const create = async ({ name, login, password }) => {
+  const user = new User({ name, login, password });
+  await user.save();
+  return user;
 };
 
 const update = async (id, { name, login, password }) => {
-  users[id] = new User({ id, name, login, password });
-  return users[id];
+  const user = await User.findOneAndUpdate(
+    { _id: id },
+    { name, login, password }
+  );
+  return user;
 };
 
 const deleteById = async id => {
-  delete users[id];
+  const deletedUser = await User.findByIdAndDelete(id);
+  return deletedUser;
 };
 
 module.exports = { getAll, getById, create, update, deleteById };

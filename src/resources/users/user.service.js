@@ -1,5 +1,4 @@
 const usersRepo = require('./user.memory.repository');
-const tasksService = require('../tasks/task.service');
 
 const getAll = () => usersRepo.getAll();
 
@@ -12,7 +11,6 @@ const update = (id, { name, login, password }) =>
 
 const deleteById = id => {
   usersRepo.deleteById(id);
-  tasksService.resetByUserId(id);
 };
 
 module.exports = { getAll, getById, create, update, deleteById };

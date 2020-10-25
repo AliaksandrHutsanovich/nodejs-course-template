@@ -12,7 +12,7 @@ router.route('/:boardId/tasks/:taskId').get(async (req, res) => {
     req.params.boardId,
     req.params.taskId
   );
-  res.json(task);
+  res.json(Task.toResponse(task));
 });
 
 router.route('/:boardId/tasks').post(async (req, res) => {

@@ -1,22 +1,35 @@
-const uuid = require('uuid');
 const Task = require('./task.model');
-const { tasks } = require('../../hardcodedData');
 
 const getAll = async boardId => {
-  return Object.keys(tasks)
-    .filter(key => tasks[key].boardId === boardId)
-    .map(key => tasks[key]);
+  const tasks = await Task.find({ boardId });
+  return tasks;
 };
 
 const getById = async (boardId, taskId) => {
-  return Object.keys(tasks)
-    .filter(key => tasks[key].boardId === boardId && tasks[key].id === taskId)
-    .map(key => tasks[key])[0];
+  const task = await Task.findOne({ _id: taskId, boardId });
+  return task;
 };
 
-const create = async (boardId, { id = uuid(), title, order, description }) => {
-  tasks[id] = new Task({ id, title, order, description, boardId });
-  return tasks[id];
+const create = async (boardId, { title, order, description }) => {
+  const task = new Task({
+    title,
+    order,
+    description,
+    userId: null,
+    boardId,
+    columnId: null
+  });
+  await task.save();
+  return {
+    id: task._id,
+    _id: task.id,
+    title,
+    order,
+    description,
+    userId: null,
+    boardId,
+    columnId: null
+  };
 };
 
 const update = async (
@@ -24,20 +37,30 @@ const update = async (
   id,
   { title, order, description, userId, columnId }
 ) => {
-  tasks[id] = new Task({
-    id,
-    title,
-    order,
-    description,
-    userId,
-    boardId,
-    columnId
-  });
-  return tasks[id];
+  const task = await Task.findOneAndUpdate(
+    { _id: id },
+    { title, order, description, userId, columnId, boardId }
+  );
+  return task;
 };
 
 const deleteById = async (boardId, id) => {
-  delete tasks[id];
+  const deletedTask = await Task.findByIdAndDelete(id);
+  return deletedTask;
 };
 
-module.exports = { getAll, getById, create, update, deleteById };
+const deleteByBoardId = async boardId => {
+  const ids = (await getAll(boardId)).map(({ _id }) => _id);
+  for (const id of ids) {
+    await Task.findByIdAndDelete(id);
+  }
+};
+
+module.exports = {
+  getAll,
+  getById,
+  create,
+  update,
+  deleteById,
+  deleteByBoardId
+};

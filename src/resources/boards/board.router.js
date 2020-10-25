@@ -14,13 +14,14 @@ router.route('/:id').get(async (req, res) => {
   const board = await boardsService.getById(req.params.id);
   if (!board) {
     res.status(404).json({ message: 'No board with such id' });
+  } else {
+    res.json(Board.toResponse(board));
   }
-  res.json(board);
 });
 
 router.route('/').post(async (req, res) => {
   const board = await boardsService.create(req.body);
-  res.json(board);
+  res.json(Board.toResponse(board));
 });
 
 router.route('/:id').put(async (req, res) => {
@@ -45,13 +46,14 @@ router.route('/:boardId/tasks/:taskId').get(async (req, res) => {
   );
   if (!task) {
     res.status(404).json({ message: 'No task with such id' });
+  } else {
+    res.json(Task.toResponse(task));
   }
-  res.json(task);
 });
 
 router.route('/:boardId/tasks').post(async (req, res) => {
   const task = await tasksService.create(req.params.boardId, req.body);
-  res.json(task);
+  res.json(Task.toResponse(task));
 });
 
 router.route('/:boardId/tasks/:taskId').put(async (req, res) => {
