@@ -11,16 +11,29 @@ const getById = async id => {
   return user;
 };
 
-const create = async ({ name, login, password }) => {
-  const user = new User({ name, login, password });
+const getByLogin = async login => {
+  const user = await User.findOne({ login });
+  return user;
+};
+
+const getByToken = async token => {
+  const user = await User.findOne({ accessToken: token });
+  return user;
+};
+
+const create = async user => {
   await user.save();
   return user;
 };
 
-const update = async (id, { name, login, password }) => {
+const update = async (id, { name, login, password, accessToken }) => {
+  let token;
+  if (!accessToken) {
+    token = (await User.findOne({ _id: id })).accessToken;
+  }
   const user = await User.findOneAndUpdate(
     { _id: id },
-    { name, login, password }
+    { name, login, password, accessToken: accessToken || token }
   );
   return user;
 };
@@ -30,4 +43,12 @@ const deleteById = async id => {
   return deletedUser;
 };
 
-module.exports = { getAll, getById, create, update, deleteById };
+module.exports = {
+  getAll,
+  getById,
+  create,
+  update,
+  deleteById,
+  getByLogin,
+  getByToken
+};

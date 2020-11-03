@@ -2,8 +2,12 @@ const express = require('express');
 const swaggerUI = require('swagger-ui-express');
 const path = require('path');
 const YAML = require('yamljs');
+const passport = require('passport');
+const userService = require('./resources/users/user.service');
+const BearerStrategy = require('passport-http-bearer');
 const userRouter = require('./resources/users/user.router');
 const boardRouter = require('./resources/boards/board.router');
+const loginRouter = require('./resources/login/login.router');
 const { finished } = require('stream');
 const {
   StatusCodes: { INTERNAL_SERVER_ERROR },
@@ -49,9 +53,29 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.use('/users', userRouter);
+passport.use(
+  new BearerStrategy(async (token, done) => {
+    const user = await userService.getByToken(token);
+    if (!user) {
+      return done(null, false);
+    }
+    return done(null, user, { scope: 'all' });
+  })
+);
 
-app.use('/boards', boardRouter);
+app.use('/login', loginRouter);
+
+app.use(
+  '/users',
+  passport.authenticate('bearer', { session: false }),
+  userRouter
+);
+
+app.use(
+  '/boards',
+  passport.authenticate('bearer', { session: false }),
+  boardRouter
+);
 
 process.on('uncaughtException', error => {
   console.error(`capture error: ${error.message}`);
